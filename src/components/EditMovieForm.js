@@ -3,9 +3,11 @@ import { useParams, useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import axios from "axios";
+import { useAxios } from "../hooks/useAxios";
 
 const EditMovieForm = (props) => {
   const { push } = useHistory();
+  const { id } = useParams();
 
   const { setMovies } = props;
   const [movie, setMovie] = useState({
@@ -14,6 +16,17 @@ const EditMovieForm = (props) => {
     genre: "",
     metascore: 0,
     description: "",
+  });
+
+  const [movieData, getMovies, loading, err] = useAxios({
+    reqType: "get",
+    endpoint: `movies/${id}`,
+  });
+
+  const [newMovieData, putMovie, putLoading, putErr] = useAxios({
+    reqType: "put",
+    endpoint: `movies/${id}`,
+    payload: "movie",
   });
 
   const handleChange = (e) => {
@@ -25,6 +38,7 @@ const EditMovieForm = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     axios
       .put(`http://localhost:9000/api/movies/${id}`, movie)
       .then((res) => {
@@ -38,11 +52,19 @@ const EditMovieForm = (props) => {
 
   const { title, director, genre, metascore, description } = movie;
 
+  useEffect(() => {
+    getMovies()
+      .then((res) => setMovie(res))
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <div className="bg-white rounded-md shadow flex-1">
       <form onSubmit={handleSubmit}>
         <div className="p-5 pb-3 border-b border-zinc-200">
-          <h4 className="text-xl font-bold">Düzenleniyor <strong>{movie.title}</strong></h4>
+          <h4 className="text-xl font-bold">
+            Düzenleniyor <strong>{movie.title}</strong>
+          </h4>
         </div>
 
         <div className="px-5 py-3">
